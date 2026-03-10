@@ -1,6 +1,12 @@
 # Use official Python image for the base
 FROM python:3.12-slim
 
+RUN apt-get update && apt-get install -y \
+    ca-certificates \
+    curl \
+    && update-ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+    
 # Install uv globally
 RUN pip install uv
 
