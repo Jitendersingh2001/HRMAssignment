@@ -1,15 +1,4 @@
 services:
-  mongodb:
-    image: mongo:latest
-    container_name: hrms_backend_mongodb
-    restart: unless-stopped
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongodb_data:/data/db
-    networks:
-      - hrms_backend_network
-
   api:
     build: .
     container_name: hrms_backend_api
@@ -17,18 +6,13 @@ services:
     ports:
       - "${PORT:-8000}:${PORT:-8000}"
     environment:
-      - MONGODB_URI=mongodb://mongodb:27017
-      - DATABASE_NAME=hrms_lite
+      - MONGODB_URI=${MONGODB_URI}
+      - DATABASE_NAME=${DATABASE_NAME:-hrms_lite}
       - API_TOKEN=${API_TOKEN:-admin123-token}
       - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-*}
       - PORT=${PORT:-8000}
-    depends_on:
-      - mongodb
     networks:
       - hrms_backend_network
-
-volumes:
-  mongodb_data:
 
 networks:
   hrms_backend_network:
