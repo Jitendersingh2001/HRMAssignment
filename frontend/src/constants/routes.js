@@ -5,7 +5,5 @@ export const ROUTES = {
   EMPLOYEES: '/employees',
   EMPLOYEE_PROFILE: '/employees/:employeeId',
   ATTENDANCE: '/attendance',
-  
-  // Helper for dynamic generation
   employeeProfile: (employeeId) => `/employees/${employeeId}`,
 };
