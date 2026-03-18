@@ -60,7 +60,6 @@ The backend runs in Docker; the frontend is run with npm for local development.
    Edit `backend/.env` and set at least:
 
    - `MONGODB_URI` — your MongoDB connection string  
-   - `API_TOKEN` — token used by the frontend (e.g. `admin123-token`)  
    - `ALLOWED_ORIGINS` — e.g. `http://localhost:5173` for Vite dev server  
 
    Then start the API:
@@ -90,7 +89,6 @@ The backend runs in Docker; the frontend is run with npm for local development.
 |------------------|--------------------------------------|----------------------------|
 | `MONGODB_URI`    | MongoDB connection string            | `mongodb://localhost:27017` or Atlas URI |
 | `DATABASE_NAME`  | Database name                        | `hrms_lite` (default)      |
-| `API_TOKEN`      | Token for API auth (frontend sends this) | `admin123-token`       |
 | `ALLOWED_ORIGINS`| CORS origins (comma-separated)       | `http://localhost:5173`    |
 | `PORT`           | API port                             | `8000` (default)           |
 
@@ -111,7 +109,7 @@ The backend runs in Docker; the frontend is run with npm for local development.
 - **Frontend** (`frontend/`) — React SPA with Vite; production build can be served by Nginx (see `frontend/Dockerfile`).
 - **Backend** (`backend/`) — FastAPI app; connects to MongoDB on startup and exposes REST API under `/api/*`.
 - **Database** — MongoDB; indexes for unique `employee_id`, unique `email`, and unique `(employee_id, date)` for attendance are created by `backend/init_db.py`.
-- **Auth** — API uses a shared token (`API_TOKEN`) sent in request headers; no user login UI.
+- **Auth** — No authentication is enforced (single-admin assumption).
 
 ---
 
