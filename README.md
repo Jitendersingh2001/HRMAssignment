@@ -6,7 +6,7 @@ A lightweight Human Resource Management System (HRMS) focused on essential HR op
 
 ## Project Overview
 
-HRMS-Lite is a full-stack application for managing employees, departments, and daily attendance. It provides a simple UI for HR tasks with validation on both frontend and backend, and supports deployment via Docker.
+HRMS-Lite is a full-stack application for managing employees, departments, and daily attendance. It provides a simple UI for HR tasks with validation on both frontend and backend.
 
 **Key capabilities:**
 
@@ -24,11 +24,11 @@ The frontend and backend are in separate folders (`frontend/` and `backend/`) an
 
 | Layer      | Technologies |
 |-----------|---------------|
-| **Frontend** | React 19, Vite 7, Tailwind CSS 4, React Router 7, Axios, Lucide React, date-fns |
+| **Frontend** | React 19, Vite 7, Tailwind CSS 4, shadcn/ui, React Router 7, Axios, Lucide React, date-fns |
 | **Backend**  | FastAPI, Python 3.12, Uvicorn |
 | **Database** | MongoDB (async via Motor) |
 | **Validation & Config** | Pydantic, pydantic-settings, python-dotenv, email-validator |
-| **Deployment** | Docker, Docker Compose, Nginx (frontend production build) |
+| **Deployment** | Render (backend), Vercel (frontend) |
 
 ---
 
@@ -47,7 +47,7 @@ The frontend and backend are in separate folders (`frontend/` and `backend/`) an
 The backend runs in Docker; the frontend is run with npm for local development.
 
 1. **MongoDB**  
-   Ensure MongoDB is running and you have a connection URI (e.g. `mongodb://localhost:27017` or an Atlas `mongodb+srv://...` URI).
+   Use **MongoDB Atlas** and have your Atlas connection URI ready (e.g. `mongodb+srv://...`).
 
 2. **Backend (Docker)**  
    From the project root:
@@ -106,9 +106,9 @@ The backend runs in Docker; the frontend is run with npm for local development.
 
 ## Application architecture
 
-- **Frontend** (`frontend/`) — React SPA with Vite; production build can be served by Nginx (see `frontend/Dockerfile`).
-- **Backend** (`backend/`) — FastAPI app; connects to MongoDB on startup and exposes REST API under `/api/*`.
-- **Database** — MongoDB; indexes for unique `employee_id`, unique `email`, and unique `(employee_id, date)` for attendance are created by `backend/init_db.py`.
+- **Frontend** (`frontend/`) — React SPA with Vite; deployed on **Vercel**.
+- **Backend** (`backend/`) — FastAPI app; connects to **MongoDB Atlas** and exposes REST API under `/api/*`; deployed on **Render**.
+- **Database** — MongoDB Atlas; indexes for unique `employee_id`, unique `email`, and unique `(employee_id, date)` for attendance are created by `backend/init_db.py`.
 - **Auth** — No authentication is enforced (single-admin assumption).
 
 ---
@@ -116,5 +116,6 @@ The backend runs in Docker; the frontend is run with npm for local development.
 ## UI notes
 
 - Tailwind CSS is used for layout and styling.
+- **shadcn/ui** is used for reusable UI components.
 - **Lucide React** provides icons.
 - **React Router** is used with a shared layout and sidebar for navigation.
