@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import AppLayout from './layouts/AppLayout';
 import Dashboard from './pages/Dashboard';
 import Employees from './pages/Employees';
@@ -7,6 +8,19 @@ import Attendance from './pages/Attendance';
 import { ROUTES } from './constants/routes';
 
 function App() {
+  useEffect(() => {
+    // Initialize theme on app mount
+    const savedTheme = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const theme = savedTheme || (prefersDark ? 'dark' : 'light');
+    
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, []);
+
   return (
     <BrowserRouter>
       <Routes>

@@ -1,8 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Trash2, Eye, Mail, Briefcase } from 'lucide-react';
+import { Plus, Trash2, Eye, Mail, Briefcase, Loader2 } from 'lucide-react';
 import api from '../api/client';
-import { Button, Input, Modal, Select } from '../components/ui';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { ROUTES } from '../constants/routes';
 
 export default function Employees() {
@@ -117,11 +125,11 @@ export default function Employees() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Employees</h2>
-          <p className="mt-1 text-sm text-gray-500">
+          <h2 className="text-3xl font-bold tracking-tight text-foreground">Employees</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
             Manage your company's workforce and departments.
           </p>
         </div>
@@ -132,18 +140,20 @@ export default function Employees() {
       </div>
 
       {error ? (
-        <div className="rounded-lg bg-red-50 p-4 border border-red-200">
-          <p className="text-sm text-red-800">{error}</p>
-        </div>
+        <Card className="border-destructive/50 bg-destructive/10">
+          <CardContent className="pt-6">
+            <p className="text-sm text-destructive font-medium">{error}</p>
+          </CardContent>
+        </Card>
       ) : isLoading ? (
-        <div className="flex justify-center items-center h-64">
-           <span className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
+        <div className="space-y-4">
+          {[1, 2, 3, 4, 5].map(i => <Skeleton key={i} className="h-16 w-full rounded-xl" />)}
         </div>
       ) : employees.length === 0 ? (
-        <div className="text-center py-16 px-4 rounded-xl border-2 border-dashed border-gray-200 bg-white">
-          <Briefcase className="mx-auto h-12 w-12 text-gray-400" />
-          <h3 className="mt-2 text-sm font-semibold text-gray-900">No employees</h3>
-          <p className="mt-1 text-sm text-gray-500">Get started by adding a new employee.</p>
+        <div className="text-center py-16 px-4 rounded-xl border-2 border-dashed border-border bg-card">
+          <Briefcase className="mx-auto h-12 w-12 text-muted-foreground/50" />
+          <h3 className="mt-2 text-sm font-semibold text-foreground">No employees</h3>
+          <p className="mt-1 text-sm text-muted-foreground">Get started by adding a new employee.</p>
           <div className="mt-6">
             <Button onClick={() => setIsModalOpen(true)}>
               <Plus className="w-4 h-4 mr-2" />
@@ -152,50 +162,50 @@ export default function Employees() {
           </div>
         </div>
       ) : (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Employee ID</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+        <Card className="border-border/50">
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader className="bg-muted/50">
+                <TableRow className="hover:bg-transparent">
+                  <TableHead className="px-6 h-12">Employee ID</TableHead>
+                  <TableHead className="px-6 h-12">Name</TableHead>
+                  <TableHead className="px-6 h-12">Department</TableHead>
+                  <TableHead className="px-6 h-12 text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {employees.map((employee) => (
-                  <tr key={employee._id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  <TableRow key={employee._id} className="border-b/50">
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       {employee.employee_id}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">{employee.full_name}</div>
-                      <div className="flex flex-col gap-1 mt-1 text-sm text-gray-500">
+                    </TableCell>
+                    <TableCell className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium">{employee.full_name}</div>
+                      <div className="flex flex-col gap-1 mt-1 text-sm text-muted-foreground">
                         <div className="flex items-center">
-                          <Mail className="w-3 h-3 mr-1" />
+                          <Mail className="w-3 h-3 mr-1.5" />
                           {employee.email}
                         </div>
                         {employee.phone && (
                           <div className="flex items-center">
-                            <span className="w-3 h-3 mr-1 flex items-center justify-center text-[10px]">📞</span>
+                            <span className="w-3 h-3 mr-1.5 flex items-center justify-center text-[10px]">📞</span>
                             {employee.phone}
                           </div>
                         )}
                       </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
+                    </TableCell>
+                    <TableCell className="px-6 py-4 whitespace-nowrap">
+                      <Badge variant="secondary" className="px-2 py-0.5 pointer-events-none">
                         {employee.department}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-right">
                       <div className="flex items-center justify-end gap-1">
                         <Button 
                           variant="ghost" 
                           size="icon" 
                           onClick={() => navigate(ROUTES.employeeProfile(employee.employee_id))}
-                          className="text-blue-600 hover:text-blue-900 hover:bg-blue-50"
+                          className="text-primary hover:text-primary hover:bg-primary/10"
                           title="View Profile"
                         >
                           <Eye className="w-4 h-4" />
@@ -204,116 +214,143 @@ export default function Employees() {
                           variant="ghost" 
                           size="icon" 
                           onClick={() => confirmDelete(employee)}
-                          className="text-red-600 hover:text-red-900 hover:bg-red-50"
+                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
                           title="Delete Employee"
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
       )}
 
-      <Modal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        title="Add New Employee"
-      >
-        <form onSubmit={handleSubmit} className="space-y-4 pt-2">
-          {formError && (
-            <div className="p-3 text-sm text-red-600 bg-red-50 rounded-lg border border-red-100">
-              {formError}
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add New Employee</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-4 pt-2">
+            {formError && (
+              <div className="p-3 text-sm text-destructive bg-destructive/10 rounded-lg border border-destructive/20">
+                {formError}
+              </div>
+            )}
+            
+            <div className="space-y-2">
+              <Label htmlFor="employee_id">Employee ID</Label>
+              <Input
+                id="employee_id"
+                name="employee_id"
+                value={formData.employee_id}
+                onChange={handleInputChange}
+                placeholder="e.g. EMP001"
+                required
+                pattern="^EMP\d+$"
+                title="ID must start with EMP followed by numbers (e.g., EMP001)"
+              />
             </div>
-          )}
-          
-          <Input
-            label="Employee ID"
-            name="employee_id"
-            value={formData.employee_id}
-            onChange={handleInputChange}
-            placeholder="e.g. EMP001"
-            required
-            pattern="^EMP\d+$"
-            title="ID must start with EMP followed by numbers (e.g., EMP001)"
-          />
-          <Input
-            label="Full Name"
-            name="full_name"
-            value={formData.full_name}
-            onChange={handleInputChange}
-            placeholder="John Doe"
-            required
-            minLength={2}
-            maxLength={100}
-            pattern="^[A-Za-z\s]+$"
-            title="Full name must contain only letters and spaces (2-100 characters)"
-          />
-          <Input
-            label="Email Address"
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleInputChange}
-            placeholder="john@company.com"
-            maxLength={100}
-            required
-          />
-          <Select
-            label="Department"
-            name="department"
-            value={formData.department}
-            onChange={handleInputChange}
-            options={departments}
-            required
-            title="Please select a valid department"
-          />
-          <Input
-            label="Phone Number"
-            type="tel"
-            name="phone"
-            value={formData.phone}
-            onChange={handleInputChange}
-            placeholder="e.g. +1234567890"
-            required
-            pattern="^\+?[0-9]{10,15}$"
-            title="Phone number must be exactly 10-15 digits, optionally starting with +"
-          />
-          
-          <div className="mt-6 flex justify-end gap-3 border-t pt-4">
-            <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)}>
-              Cancel
-            </Button>
-            <Button type="submit" isLoading={isSubmitting}>
-              Add Employee
-            </Button>
-          </div>
-        </form>
-      </Modal>
 
-      <Modal
-        isOpen={isDeleteModalOpen}
-        onClose={() => setIsDeleteModalOpen(false)}
-        title="Delete Employee"
-      >
-        <div className="pt-2">
-          <p className="text-sm text-gray-500">
-            Are you sure you want to delete <strong>{employeeToDelete?.full_name}</strong>? This action will also delete all of their attendance records and cannot be undone.
-          </p>
-          <div className="mt-6 flex justify-end gap-3 border-t pt-4">
+            <div className="space-y-2">
+              <Label htmlFor="full_name">Full Name</Label>
+              <Input
+                id="full_name"
+                name="full_name"
+                value={formData.full_name}
+                onChange={handleInputChange}
+                placeholder="John Doe"
+                required
+                minLength={2}
+                maxLength={100}
+                pattern="^[A-Za-z\s]+$"
+                title="Full name must contain only letters and spaces (2-100 characters)"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="email">Email Address</Label>
+              <Input
+                id="email"
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                placeholder="john@company.com"
+                maxLength={100}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="department">Department</Label>
+              <Select 
+                name="department" 
+                value={formData.department} 
+                onValueChange={(val) => handleInputChange({ target: { name: 'department', value: val }})}
+                required
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select Department" />
+                </SelectTrigger>
+                <SelectContent>
+                  {departments.map((opt) => (
+                    <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="phone">Phone Number</Label>
+              <Input
+                id="phone"
+                type="tel"
+                name="phone"
+                value={formData.phone}
+                onChange={handleInputChange}
+                placeholder="e.g. +1234567890"
+                required
+                pattern="^\+?[0-9]{10,15}$"
+                title="Phone number must be exactly 10-15 digits, optionally starting with +"
+              />
+            </div>
+            
+            <DialogFooter className="mt-6 pt-4 border-t">
+              <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Add Employee
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Delete Employee</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete <strong>{employeeToDelete?.full_name}</strong>? This action will also delete all of their attendance records and cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="mt-4 pt-4 border-t">
             <Button type="button" variant="outline" onClick={() => setIsDeleteModalOpen(false)}>
               Cancel
             </Button>
-            <Button type="button" variant="danger" onClick={handleDelete} isLoading={isDeleting}>
+            <Button type="button" variant="destructive" onClick={handleDelete} disabled={isDeleting}>
+              {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Delete Employee
             </Button>
-          </div>
-        </div>
-      </Modal>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

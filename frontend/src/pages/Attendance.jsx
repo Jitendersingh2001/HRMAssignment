@@ -1,8 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Search, Calendar as CalendarIcon, CheckCircle2, XCircle, X } from 'lucide-react';
+import { Search, Calendar as CalendarIcon, CheckCircle2, XCircle, X, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import api from '../api/client';
-import { Button, Input } from '../components/ui';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
 
 export default function Attendance() {
   const [employees, setEmployees] = useState([]);
@@ -106,184 +110,187 @@ export default function Attendance() {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in duration-500">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900">Attendance Tracker</h2>
-        <p className="mt-1 text-sm text-gray-500">
+        <h2 className="text-3xl font-bold tracking-tight text-foreground">Attendance Tracker</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
           Mark daily attendance and view historical records.
         </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column: Employee Selection */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden lg:col-span-1 flex flex-col h-[600px]">
-          <div className="p-4 border-b border-gray-100 bg-gray-50">
+        <Card className="border-border/50 lg:col-span-1 flex flex-col h-[600px] overflow-hidden">
+          <CardHeader className="p-4 border-b bg-muted/30">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input 
-                className="pl-9 bg-white" 
+                className="pl-9 bg-background" 
                 placeholder="Search employees..." 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-          </div>
+          </CardHeader>
           
-          <div className="flex-1 overflow-y-auto">
+          <CardContent className="flex-1 overflow-y-auto p-0">
             {isLoadingEmployees ? (
               <div className="flex justify-center items-center h-full">
-                <span className="h-6 w-6 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
               </div>
             ) : filteredEmployees.length === 0 ? (
-              <div className="p-6 text-center text-gray-500 text-sm">
+              <div className="p-6 text-center text-muted-foreground text-sm">
                 No employees found.
               </div>
             ) : (
-              <ul className="divide-y divide-gray-100">
+              <ul className="divide-y divide-border/50">
                 {filteredEmployees.map((emp) => (
                   <li key={emp._id}>
                     <button
                       onClick={() => setSelectedEmployee(emp.employee_id)}
-                      className={`w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors ${
-                        selectedEmployee === emp.employee_id ? 'bg-blue-50/50 border-l-4 border-blue-600' : 'border-l-4 border-transparent'
+                      className={`w-full text-left px-4 py-3 hover:bg-muted/50 transition-colors ${
+                        selectedEmployee === emp.employee_id ? 'bg-primary/5 border-l-4 border-l-primary' : 'border-l-4 border-l-transparent'
                       }`}
                     >
-                      <div className="font-medium text-sm text-gray-900">{emp.full_name}</div>
-                      <div className="text-xs text-gray-500 mt-0.5">{emp.employee_id} • {emp.department}</div>
+                      <div className="font-medium text-sm text-foreground">{emp.full_name}</div>
+                      <div className="text-xs text-muted-foreground mt-0.5">{emp.employee_id} • {emp.department}</div>
                     </button>
                   </li>
                 ))}
               </ul>
             )}
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
         {/* Right Column: Mark Attendance & Global Records */}
         <div className="lg:col-span-2 space-y-6">
            {selectedEmployee ? (
-             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900">
-                      {employees.find(e => e.employee_id === selectedEmployee)?.full_name}
-                    </h3>
-                    <p className="text-sm text-gray-500">Record attendance for today</p>
+             <Card className="border-border/50">
+                <CardContent className="p-6">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                      <h3 className="text-lg font-semibold text-foreground">
+                        {employees.find(e => e.employee_id === selectedEmployee)?.full_name}
+                      </h3>
+                      <p className="text-sm text-muted-foreground">Record attendance for today</p>
+                    </div>
+                    <div className="flex gap-2 w-full sm:w-auto">
+                      <Button 
+                        onClick={() => handleMarkAttendance('Present')}
+                        disabled={isMarking}
+                        className="flex-1 sm:flex-none border-green-200 bg-green-50 text-green-700 hover:bg-green-100 hover:border-green-300 dark:bg-green-500/10 dark:text-green-400 dark:border-green-500/20 dark:hover:bg-green-500/20"
+                        variant="outline"
+                      >
+                        {isMarking ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <CheckCircle2 className="w-4 h-4 mr-2" />}
+                        Present
+                      </Button>
+                      <Button 
+                        onClick={() => handleMarkAttendance('Absent')}
+                        disabled={isMarking}
+                        className="flex-1 sm:flex-none border-red-200 bg-red-50 text-red-700 hover:bg-red-100 hover:border-red-300 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20 dark:hover:bg-red-500/20"
+                        variant="outline"
+                      >
+                        {isMarking ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <XCircle className="w-4 h-4 mr-2" />}
+                        Absent
+                      </Button>
+                    </div>
                   </div>
-                  <div className="flex gap-2 w-full sm:w-auto">
-                    <Button 
-                      onClick={() => handleMarkAttendance('Present')}
-                      isLoading={isMarking}
-                      className="flex-1 sm:flex-none border-green-200 bg-green-50 text-green-700 hover:bg-green-100 hover:border-green-300"
-                    >
-                      <CheckCircle2 className="w-4 h-4 mr-2" />
-                      Present
-                    </Button>
-                    <Button 
-                      onClick={() => handleMarkAttendance('Absent')}
-                      isLoading={isMarking}
-                      className="flex-1 sm:flex-none border-red-200 bg-red-50 text-red-700 hover:bg-red-100 hover:border-red-300"
-                    >
-                      <XCircle className="w-4 h-4 mr-2" />
-                      Absent
-                    </Button>
-                  </div>
-                </div>
 
-                {error && (
-                  <div className="mt-4 p-3 text-sm text-red-600 bg-red-50 rounded-lg border border-red-100">
-                    {error}
-                  </div>
-                )}
-             </div>
+                  {error && (
+                    <div className="mt-4 p-3 text-sm text-destructive bg-destructive/10 rounded-lg border border-destructive/20">
+                      {error}
+                    </div>
+                  )}
+                </CardContent>
+             </Card>
            ) : (
-             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 text-center text-gray-500 text-sm">
-                Select an employee from the left panel to mark their attendance for today.
-             </div>
+             <Card className="border-border/50">
+                <CardContent className="p-6 text-center text-muted-foreground text-sm">
+                  Select an employee from the left panel to mark their attendance for today.
+                </CardContent>
+             </Card>
            )}
 
            {/* Global Attendance Table */}
-           <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-              <div className="px-6 py-4 border-b border-gray-100 bg-gray-50">
+           <Card className="border-border/50 overflow-hidden">
+              <CardHeader className="px-6 py-4 border-b bg-muted/30">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                  <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wider">Attendance Records</h3>
+                  <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Attendance Records</CardTitle>
                   
                   {/* Date Filters */}
-                  <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-lg p-1 shadow-sm">
+                  <div className="flex items-center gap-2 bg-background border border-border rounded-lg p-1 shadow-sm">
                     <Input
                       type="date"
                       value={startDate}
                       onChange={(e) => setStartDate(e.target.value)}
-                      className="w-[130px] text-xs !py-1.5 border-0 focus:ring-0 bg-transparent"
+                      className="w-[130px] h-8 text-xs border-0 focus-visible:ring-0 bg-transparent"
                     />
-                    <span className="text-xs font-semibold text-gray-400 px-1">to</span>
+                    <span className="text-xs font-semibold text-muted-foreground px-1">to</span>
                     <Input
                       type="date"
                       value={endDate}
                       onChange={(e) => setEndDate(e.target.value)}
-                      className="w-[130px] text-xs !py-1.5 border-0 focus:ring-0 bg-transparent"
+                      className="w-[130px] h-8 text-xs border-0 focus-visible:ring-0 bg-transparent"
                     />
                     {isFiltered && (
                       <button 
                         onClick={handleClearFilter} 
-                        className="p-1.5 mr-0.5 text-gray-400 hover:text-gray-600 rounded-md hover:bg-gray-100 transition-colors flex items-center justify-center title='Clear filters'"
+                        className="p-1.5 mr-0.5 text-muted-foreground hover:text-foreground rounded-md hover:bg-muted transition-colors flex items-center justify-center title='Clear filters'"
                       >
                         <X className="w-4 h-4" />
                       </button>
                     )}
                   </div>
                 </div>
-              </div>
+              </CardHeader>
               
-              <div className="p-0">
+              <CardContent className="p-0">
                 {isLoadingRecords ? (
                    <div className="py-12 flex justify-center">
-                     <span className="h-6 w-6 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+                     <Loader2 className="h-6 w-6 animate-spin text-primary" />
                    </div>
                 ) : attendanceRecords.length === 0 ? (
-                  <div className="py-12 text-center text-sm text-gray-500">
-                     <CalendarIcon className="mx-auto h-8 w-8 text-gray-300 mb-2" />
+                  <div className="py-12 text-center text-sm text-muted-foreground">
+                     <CalendarIcon className="mx-auto h-8 w-8 text-muted/50 mb-2" />
                      No attendance records found{isFiltered ? ' for the selected date range' : ''}.
                   </div>
                 ) : (
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Employee</th>
-                          <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {attendanceRecords.map((record) => (
-                          <tr key={record._id} className="hover:bg-gray-50">
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                              <div className="flex items-center gap-2">
-                                <CalendarIcon className="w-4 h-4 text-gray-400" />
-                                {format(new Date(record.date), 'MMMM d, yyyy')}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                              {/* If backend doesn't return full name, fallback to employee_id */}
-                              {record.employee_id}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
-                              <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                                record.status === 'Present' 
-                                  ? 'bg-green-100 text-green-800' 
-                                  : 'bg-red-100 text-red-800'
-                              }`}>
-                                {record.status}
-                              </span>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="hover:bg-transparent">
+                        <TableHead className="px-6 h-10">Date</TableHead>
+                        <TableHead className="px-6 h-10">Employee</TableHead>
+                        <TableHead className="px-6 h-10 text-right">Status</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {attendanceRecords.map((record) => (
+                        <TableRow key={record._id} className="border-b/50">
+                          <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
+                            <div className="flex items-center gap-2">
+                              <CalendarIcon className="w-4 h-4" />
+                              {format(new Date(record.date), 'MMMM d, yyyy')}
+                            </div>
+                          </TableCell>
+                          <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-foreground">
+                            {/* If backend doesn't return full name, fallback to employee_id */}
+                            {record.employee_id}
+                          </TableCell>
+                          <TableCell className="px-6 py-4 whitespace-nowrap text-right text-sm">
+                            <Badge 
+                              variant={record.status === 'Present' ? 'default' : 'destructive'}
+                              className={record.status === 'Present' ? 'bg-green-500/15 text-green-700 dark:bg-green-500/20 dark:text-green-400 pointer-events-none shadow-none hover:bg-green-500/25 border-green-200 dark:border-green-900' : 'pointer-events-none shadow-none'}
+                            >
+                              {record.status}
+                            </Badge>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
                 )}
-              </div>
-           </div>
+              </CardContent>
+           </Card>
         </div>
       </div>
     </div>
