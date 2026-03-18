@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 export default function Attendance() {
   const [employees, setEmployees] = useState([]);
@@ -124,6 +125,19 @@ export default function Attendance() {
     return attendanceRecords.filter((record) => record.employee_id === selectedEmployee);
   }, [attendanceRecords, selectedEmployee]);
 
+  const todayParam = useMemo(() => format(new Date(), 'yyyy-MM-dd'), []);
+  const isTodayMarked = useMemo(() => {
+    if (!selectedEmployee) return false;
+    return attendanceRecords.some((record) => {
+      if (record.employee_id !== selectedEmployee) return false;
+      const recordDay = format(new Date(record.date), 'yyyy-MM-dd');
+      return recordDay === todayParam;
+    });
+  }, [attendanceRecords, selectedEmployee, todayParam]);
+
+  const isMarkDisabled = isMarking || isTodayMarked;
+  const markDisabledReason = isTodayMarked ? 'Already marked for today' : null;
+
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       <div>
@@ -189,26 +203,43 @@ export default function Attendance() {
                       </h3>
                       <p className="text-sm text-muted-foreground">Record attendance for today</p>
                     </div>
-                    <div className="flex gap-2 w-full sm:w-auto">
-                      <Button 
-                        onClick={() => handleMarkAttendance('Present')}
-                        disabled={isMarking}
-                        className="flex-1 sm:flex-none border-green-200 bg-green-50 text-green-700 hover:bg-green-100 hover:border-green-300 dark:bg-green-500/10 dark:text-green-400 dark:border-green-500/20 dark:hover:bg-green-500/20"
-                        variant="outline"
-                      >
-                        {isMarking ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <CheckCircle2 className="w-4 h-4 mr-2" />}
-                        Present
-                      </Button>
-                      <Button 
-                        onClick={() => handleMarkAttendance('Absent')}
-                        disabled={isMarking}
-                        className="flex-1 sm:flex-none border-red-200 bg-red-50 text-red-700 hover:bg-red-100 hover:border-red-300 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20 dark:hover:bg-red-500/20"
-                        variant="outline"
-                      >
-                        {isMarking ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <XCircle className="w-4 h-4 mr-2" />}
-                        Absent
-                      </Button>
-                    </div>
+                    <TooltipProvider>
+                      <div className="flex gap-2 w-full sm:w-auto">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className={`flex-1 sm:flex-none ${isMarkDisabled ? 'cursor-not-allowed' : ''}`}>
+                              <Button 
+                                onClick={() => handleMarkAttendance('Present')}
+                                disabled={isMarkDisabled}
+                                className="w-full sm:w-auto border-green-200 bg-green-50 text-green-700 hover:bg-green-100 hover:border-green-300 dark:bg-green-500/10 dark:text-green-400 dark:border-green-500/20 dark:hover:bg-green-500/20"
+                                variant="outline"
+                              >
+                                {isMarking ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <CheckCircle2 className="w-4 h-4 mr-2" />}
+                                Present
+                              </Button>
+                            </span>
+                          </TooltipTrigger>
+                          {markDisabledReason && <TooltipContent>{markDisabledReason}</TooltipContent>}
+                        </Tooltip>
+
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className={`flex-1 sm:flex-none ${isMarkDisabled ? 'cursor-not-allowed' : ''}`}>
+                              <Button 
+                                onClick={() => handleMarkAttendance('Absent')}
+                                disabled={isMarkDisabled}
+                                className="w-full sm:w-auto border-red-200 bg-red-50 text-red-700 hover:bg-red-100 hover:border-red-300 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20 dark:hover:bg-red-500/20"
+                                variant="outline"
+                              >
+                                {isMarking ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <XCircle className="w-4 h-4 mr-2" />}
+                                Absent
+                              </Button>
+                            </span>
+                          </TooltipTrigger>
+                          {markDisabledReason && <TooltipContent>{markDisabledReason}</TooltipContent>}
+                        </Tooltip>
+                      </div>
+                    </TooltipProvider>
                   </div>
 
                   {error && (
