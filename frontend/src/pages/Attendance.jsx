@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Search, Calendar as CalendarIcon, CheckCircle2, XCircle, X, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import api from '../api/client';
@@ -108,6 +108,11 @@ export default function Attendance() {
     emp.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     emp.employee_id.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const visibleAttendanceRecords = useMemo(() => {
+    if (!selectedEmployee) return attendanceRecords;
+    return attendanceRecords.filter((record) => record.employee_id === selectedEmployee);
+  }, [attendanceRecords, selectedEmployee]);
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
@@ -235,7 +240,8 @@ export default function Attendance() {
                     {isFiltered && (
                       <button 
                         onClick={handleClearFilter} 
-                        className="p-1.5 mr-0.5 text-muted-foreground hover:text-foreground rounded-md hover:bg-muted transition-colors flex items-center justify-center title='Clear filters'"
+                        title="Clear filters"
+                        className="p-1.5 mr-0.5 text-muted-foreground hover:text-foreground rounded-md hover:bg-muted transition-colors flex items-center justify-center"
                       >
                         <X className="w-4 h-4" />
                       </button>
@@ -249,10 +255,12 @@ export default function Attendance() {
                    <div className="py-12 flex justify-center">
                      <Loader2 className="h-6 w-6 animate-spin text-primary" />
                    </div>
-                ) : attendanceRecords.length === 0 ? (
+                ) : visibleAttendanceRecords.length === 0 ? (
                   <div className="py-12 text-center text-sm text-muted-foreground">
                      <CalendarIcon className="mx-auto h-8 w-8 text-muted/50 mb-2" />
-                     No attendance records found{isFiltered ? ' for the selected date range' : ''}.
+                     No attendance records found
+                     {selectedEmployee ? ` for ${selectedEmployee}` : ''}
+                     {isFiltered ? ' in the selected date range' : ''}.
                   </div>
                 ) : (
                   <Table>
@@ -264,7 +272,7 @@ export default function Attendance() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {attendanceRecords.map((record) => (
+                      {visibleAttendanceRecords.map((record) => (
                         <TableRow key={record._id} className="border-b/50">
                           <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                             <div className="flex items-center gap-2">

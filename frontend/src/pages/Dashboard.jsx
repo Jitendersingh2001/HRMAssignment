@@ -97,7 +97,7 @@ export default function Dashboard() {
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <div>
-        <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+        <h2 className="text-3xl font-bold tracking-tight text-foreground">Dashboard</h2>
         <p className="mt-1 text-sm text-muted-foreground">
           Overview of your HRMS at a glance.
         </p>

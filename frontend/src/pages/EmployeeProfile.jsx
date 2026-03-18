@@ -2,15 +2,17 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Mail, Phone, Briefcase, Calendar as CalendarIcon,
-  CheckCircle2, XCircle, PercentCircle
+  CheckCircle2, XCircle, PercentCircle, IdCard
 } from 'lucide-react';
 import { format } from 'date-fns';
 import api from '../api/client';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Separator } from '@/components/ui/separator';
 import { ROUTES } from '../constants/routes';
 
 export default function EmployeeProfile() {
@@ -109,167 +111,216 @@ export default function EmployeeProfile() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      {/* Back button */}
-      <Button variant="ghost" onClick={() => navigate(ROUTES.EMPLOYEES)} className="text-muted-foreground hover:text-foreground">
-        <ArrowLeft className="w-4 h-4 mr-2" /> Back to Employees
-      </Button>
+      <div className="flex">
+        <Button
+          variant="ghost"
+          onClick={() => navigate(ROUTES.EMPLOYEES)}
+          className="w-fit text-muted-foreground hover:text-foreground cursor-pointer"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" /> Back to Employees
+        </Button>
+      </div>
 
-      {/* Profile Header */}
-      <Card className="overflow-hidden border-border/50">
-        <div className="h-24 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600" />
-        <CardContent className="px-6 pb-6 pt-0">
-          <div className="flex flex-col sm:flex-row items-start sm:items-end gap-4">
-            <div className="-mt-10 flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-background border-4 border-background shadow-lg text-2xl font-bold bg-gradient-to-br from-blue-500 to-indigo-600 text-white">
-              {initials}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[360px_1fr]">
+        {/* Profile */}
+        <Card className="border-border/50 overflow-hidden">
+          <CardContent className="px-6 py-6">
+            <div className="flex items-center gap-4">
+              <Avatar size="lg" className="size-20 ring-4 ring-background shadow-sm">
+                <AvatarFallback className="text-lg font-semibold text-foreground bg-muted">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
+              <div className="min-w-0 pb-1">
+                <h2 className="truncate text-2xl font-bold tracking-tight text-foreground">
+                  {employee.full_name}
+                </h2>
+              </div>
             </div>
-            <div className="flex-1 pb-1">
-              <h2 className="text-2xl font-bold text-foreground tracking-tight">{employee.full_name}</h2>
-              <p className="text-sm text-muted-foreground font-medium">{employee.employee_id}</p>
-            </div>
-          </div>
 
-          <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-900/20">
-                <Mail className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-              </div>
-              <div className="overflow-hidden">
-                <p className="text-xs text-muted-foreground">Email</p>
-                <p className="text-sm font-medium text-foreground truncate" title={employee.email}>{employee.email}</p>
-              </div>
-            </div>
-            {employee.phone && (
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-50 dark:bg-green-900/20">
-                  <Phone className="h-4 w-4 text-green-600 dark:text-green-400" />
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Phone</p>
-                  <p className="text-sm font-medium text-foreground">{employee.phone}</p>
-                </div>
-              </div>
-            )}
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-50 dark:bg-purple-900/20">
-                <Briefcase className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Department</p>
-                <p className="text-sm font-medium text-foreground">{employee.department}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-50 dark:bg-amber-900/20">
-                <CalendarIcon className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Joined</p>
-                <p className="text-sm font-medium text-foreground">
-                  {employee.created_at ? format(new Date(employee.created_at), 'MMM d, yyyy') : '—'}
-                </p>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+            <Separator className="my-5" />
 
-      {/* Attendance Summary Cards */}
-      {summary && (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-          <Card className="relative overflow-hidden border-border/50">
-            <CardContent className="p-5">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Total Present</p>
-                  <p className="mt-1 text-3xl font-bold">{summary.total_present}</p>
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 gap-3">
+                <div className="flex items-start gap-3 rounded-lg border border-border/60 bg-muted/30 p-3">
+                  <div className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
+                    <Mail className="h-4 w-4 text-primary" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-medium text-muted-foreground">Email</p>
+                    <a
+                      className="mt-0.5 block truncate text-sm font-medium text-foreground hover:underline underline-offset-4"
+                      href={`mailto:${employee.email}`}
+                      title={employee.email}
+                    >
+                      {employee.email}
+                    </a>
+                  </div>
                 </div>
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-green-50 dark:bg-green-900/20">
-                  <CheckCircle2 className="h-6 w-6 text-green-600 dark:text-green-400" />
+
+                <div className="flex items-start gap-3 rounded-lg border border-border/60 bg-muted/30 p-3">
+                  <div className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-lg bg-secondary">
+                    <Briefcase className="h-4 w-4 text-foreground" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-medium text-muted-foreground">Department</p>
+                    <p className="mt-0.5 truncate text-sm font-medium text-foreground">
+                      {employee.department}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3 rounded-lg border border-border/60 bg-muted/30 p-3">
+                  <div className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-lg bg-muted">
+                    <IdCard className="h-4 w-4 text-foreground" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-medium text-muted-foreground">Employee ID</p>
+                    <p className="mt-0.5 truncate text-sm font-medium text-foreground">
+                      {employee.employee_id}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3 rounded-lg border border-border/60 bg-muted/30 p-3">
+                  <div className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-lg bg-muted">
+                    <CalendarIcon className="h-4 w-4 text-foreground" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-medium text-muted-foreground">Joined</p>
+                    <p className="mt-0.5 truncate text-sm font-medium text-foreground">
+                      {employee.created_at ? format(new Date(employee.created_at), 'MMM d, yyyy') : '—'}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3 rounded-lg border border-border/60 bg-muted/30 p-3">
+                  <div className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-lg bg-muted">
+                    <Phone className="h-4 w-4 text-foreground" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-medium text-muted-foreground">Phone</p>
+                    {employee.phone ? (
+                      <a
+                        className="mt-0.5 block truncate text-sm font-medium text-foreground hover:underline underline-offset-4"
+                        href={`tel:${employee.phone}`}
+                        title={employee.phone}
+                      >
+                        {employee.phone}
+                      </a>
+                    ) : (
+                      <p className="mt-0.5 text-sm font-medium text-muted-foreground">—</p>
+                    )}
+                  </div>
                 </div>
               </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Attendance */}
+        <div className="space-y-6">
+          <Card className="border-border/50 gap-0!">
+            <CardHeader className="py-4 px-6 border-b bg-muted/30">
+              <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                Attendance summary
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6">
+              {!summary ? (
+                <div className="text-sm text-muted-foreground">No summary available.</div>
+              ) : (
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                  <div className="rounded-xl border border-border/60 bg-card p-4">
+                    <div className="flex items-center justify-between gap-4">
+                      <div>
+                        <p className="text-xs font-medium text-muted-foreground">Total Present</p>
+                        <p className="mt-2 text-3xl font-bold text-foreground">{summary.total_present}</p>
+                      </div>
+                      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10">
+                        <CheckCircle2 className="h-5 w-5 text-primary" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="rounded-xl border border-border/60 bg-card p-4">
+                    <div className="flex items-center justify-between gap-4">
+                      <div>
+                        <p className="text-xs font-medium text-muted-foreground">Total Absent</p>
+                        <p className="mt-2 text-3xl font-bold text-foreground">{summary.total_absent}</p>
+                      </div>
+                      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-destructive/10">
+                        <XCircle className="h-5 w-5 text-destructive" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="rounded-xl border border-border/60 bg-card p-4">
+                    <div className="flex items-center justify-between gap-4">
+                      <div>
+                        <p className="text-xs font-medium text-muted-foreground">Attendance Rate</p>
+                        <p className="mt-2 text-3xl font-bold text-foreground">{attendanceRate}%</p>
+                      </div>
+                      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-secondary">
+                        <PercentCircle className="h-5 w-5 text-foreground" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </CardContent>
-            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-green-400 to-green-600" />
           </Card>
 
-          <Card className="relative overflow-hidden border-border/50">
-            <CardContent className="p-5">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Total Absent</p>
-                  <p className="mt-1 text-3xl font-bold">{summary.total_absent}</p>
+          <Card className="border-border/50 gap-0!">
+            <CardHeader className="py-4 px-6 border-b bg-muted/30">
+              <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                Attendance records
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              {isLoadingAttendance ? (
+                <div className="py-12 flex justify-center">
+                  <span className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
                 </div>
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-50 dark:bg-red-900/20">
-                  <XCircle className="h-6 w-6 text-red-600 dark:text-red-400" />
+              ) : attendance.length === 0 ? (
+                <div className="py-12 text-center text-sm text-muted-foreground flex flex-col items-center">
+                  <CalendarIcon className="h-8 w-8 text-muted-foreground/60 mb-2" />
+                  No attendance records found.
                 </div>
-              </div>
+              ) : (
+                <Table>
+                  <TableHeader className="bg-muted/20">
+                    <TableRow className="hover:bg-transparent">
+                      <TableHead className="px-6 h-10">Date</TableHead>
+                      <TableHead className="px-6 h-10 text-right">Status</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {attendance.map((record) => (
+                      <TableRow key={record._id} className="border-b/50">
+                        <TableCell className="px-6 font-medium">
+                          <div className="flex items-center gap-2">
+                            <CalendarIcon className="w-4 h-4 text-muted-foreground" />
+                            {format(new Date(record.date), 'MMMM d, yyyy')}
+                          </div>
+                        </TableCell>
+                        <TableCell className="px-6 text-right">
+                          <Badge
+                            variant={record.status === 'Present' ? 'secondary' : 'destructive'}
+                            className="pointer-events-none shadow-none"
+                          >
+                            {record.status}
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
             </CardContent>
-            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-red-400 to-red-600" />
-          </Card>
-
-          <Card className="relative overflow-hidden border-border/50">
-            <CardContent className="p-5">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Attendance Rate</p>
-                  <p className="mt-1 text-3xl font-bold">{attendanceRate}%</p>
-                </div>
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-50 dark:bg-indigo-900/20">
-                  <PercentCircle className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
-                </div>
-              </div>
-            </CardContent>
-            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-400 to-indigo-600" />
           </Card>
         </div>
-      )}
-
-      {/* Attendance Records */}
-      <Card className="border-border/50">
-        <CardHeader className="bg-muted/50 py-4 px-6 border-b">
-          <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Attendance Records</CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
-          {isLoadingAttendance ? (
-            <div className="py-12 flex justify-center">
-              <span className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-            </div>
-          ) : attendance.length === 0 ? (
-            <div className="py-12 text-center text-sm text-muted-foreground flex flex-col items-center">
-              <CalendarIcon className="h-8 w-8 text-muted/60 mb-2" />
-              No attendance records found.
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-transparent hover:bg-transparent">
-                  <TableHead className="px-6 h-10">Date</TableHead>
-                  <TableHead className="px-6 h-10 text-right">Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {attendance.map((record) => (
-                  <TableRow key={record._id} className="border-b/50">
-                    <TableCell className="px-6 font-medium">
-                      <div className="flex items-center gap-2">
-                        <CalendarIcon className="w-4 h-4 text-muted-foreground" />
-                        {format(new Date(record.date), 'MMMM d, yyyy')}
-                      </div>
-                    </TableCell>
-                    <TableCell className="px-6 text-right">
-                      <Badge 
-                        variant={record.status === 'Present' ? 'default' : 'destructive'}
-                        className={record.status === 'Present' ? 'bg-green-500/15 text-green-700 dark:bg-green-500/20 dark:text-green-400 pointer-events-none shadow-none hover:bg-green-500/25 border-green-200 dark:border-green-900' : 'pointer-events-none shadow-none'}
-                      >
-                        {record.status}
-                      </Badge>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+      </div>
     </div>
   );
 }

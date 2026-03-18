@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Trash2, Eye, Mail, Briefcase, Loader2 } from 'lucide-react';
+import { Plus, Trash2, Eye, Mail, Phone, Briefcase, Loader2 } from 'lucide-react';
 import api from '../api/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -133,7 +133,7 @@ export default function Employees() {
             Manage your company's workforce and departments.
           </p>
         </div>
-        <Button onClick={() => setIsModalOpen(true)}>
+        <Button onClick={() => setIsModalOpen(true)} className="cursor-pointer">
           <Plus className="w-4 h-4 mr-2" />
           Add Employee
         </Button>
@@ -155,7 +155,7 @@ export default function Employees() {
           <h3 className="mt-2 text-sm font-semibold text-foreground">No employees</h3>
           <p className="mt-1 text-sm text-muted-foreground">Get started by adding a new employee.</p>
           <div className="mt-6">
-            <Button onClick={() => setIsModalOpen(true)}>
+            <Button onClick={() => setIsModalOpen(true)} className="cursor-pointer">
               <Plus className="w-4 h-4 mr-2" />
               Add Employee
             </Button>
@@ -169,8 +169,10 @@ export default function Employees() {
                 <TableRow className="hover:bg-transparent">
                   <TableHead className="px-6 h-12">Employee ID</TableHead>
                   <TableHead className="px-6 h-12">Name</TableHead>
+                  <TableHead className="px-6 h-12 hidden sm:table-cell">Email</TableHead>
+                  <TableHead className="px-6 h-12 hidden sm:table-cell">Phone</TableHead>
                   <TableHead className="px-6 h-12">Department</TableHead>
-                  <TableHead className="px-6 h-12 text-right">Actions</TableHead>
+                  <TableHead className="px-6 h-12 text-center">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -181,17 +183,27 @@ export default function Employees() {
                     </TableCell>
                     <TableCell className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium">{employee.full_name}</div>
-                      <div className="flex flex-col gap-1 mt-1 text-sm text-muted-foreground">
-                        <div className="flex items-center">
-                          <Mail className="w-3 h-3 mr-1.5" />
-                          {employee.email}
+                      <div className="mt-1 flex flex-col gap-1 text-sm text-muted-foreground sm:hidden">
+                        <div className="flex items-center gap-1.5">
+                          <Mail className="h-3 w-3" />
+                          <span className="truncate">{employee.email}</span>
                         </div>
-                        {employee.phone && (
-                          <div className="flex items-center">
-                            <span className="w-3 h-3 mr-1.5 flex items-center justify-center text-[10px]">📞</span>
-                            {employee.phone}
-                          </div>
-                        )}
+                        <div className="flex items-center gap-1.5">
+                          <Phone className="h-3 w-3" />
+                          <span className="truncate">{employee.phone || '—'}</span>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="px-6 py-4 whitespace-nowrap hidden sm:table-cell">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Mail className="h-4 w-4" />
+                        <span className="max-w-[260px] truncate">{employee.email}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="px-6 py-4 whitespace-nowrap hidden sm:table-cell">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Phone className="h-4 w-4" />
+                        <span className="truncate">{employee.phone || '—'}</span>
                       </div>
                     </TableCell>
                     <TableCell className="px-6 py-4 whitespace-nowrap">
@@ -199,13 +211,13 @@ export default function Employees() {
                         {employee.department}
                       </Badge>
                     </TableCell>
-                    <TableCell className="px-6 py-4 whitespace-nowrap text-right">
-                      <div className="flex items-center justify-end gap-1">
+                    <TableCell className="px-6 py-4 whitespace-nowrap text-center">
+                      <div className="flex items-center justify-center gap-1">
                         <Button 
                           variant="ghost" 
                           size="icon" 
                           onClick={() => navigate(ROUTES.employeeProfile(employee.employee_id))}
-                          className="text-primary hover:text-primary hover:bg-primary/10"
+                          className="cursor-pointer text-primary hover:text-primary hover:bg-primary/10"
                           title="View Profile"
                         >
                           <Eye className="w-4 h-4" />
@@ -214,7 +226,7 @@ export default function Employees() {
                           variant="ghost" 
                           size="icon" 
                           onClick={() => confirmDelete(employee)}
-                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                          className="cursor-pointer text-destructive hover:text-destructive hover:bg-destructive/10"
                           title="Delete Employee"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -293,7 +305,7 @@ export default function Employees() {
                 onValueChange={(val) => handleInputChange({ target: { name: 'department', value: val }})}
                 required
               >
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select Department" />
                 </SelectTrigger>
                 <SelectContent>
@@ -320,10 +332,10 @@ export default function Employees() {
             </div>
             
             <DialogFooter className="mt-6 pt-4 border-t">
-              <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)}>
+              <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)} className="cursor-pointer">
                 Cancel
               </Button>
-              <Button type="submit" disabled={isSubmitting}>
+              <Button type="submit" disabled={isSubmitting} className="cursor-pointer">
                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Add Employee
               </Button>
@@ -341,10 +353,10 @@ export default function Employees() {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="mt-4 pt-4 border-t">
-            <Button type="button" variant="outline" onClick={() => setIsDeleteModalOpen(false)}>
+            <Button type="button" variant="outline" onClick={() => setIsDeleteModalOpen(false)} className="cursor-pointer">
               Cancel
             </Button>
-            <Button type="button" variant="destructive" onClick={handleDelete} disabled={isDeleting}>
+            <Button type="button" variant="destructive" onClick={handleDelete} disabled={isDeleting} className="cursor-pointer">
               {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Delete Employee
             </Button>
