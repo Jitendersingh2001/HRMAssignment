@@ -8,7 +8,6 @@ services:
     environment:
       - MONGODB_URI=${MONGODB_URI}
       - DATABASE_NAME=${DATABASE_NAME:-hrms_lite}
-      - API_TOKEN=${API_TOKEN:-admin123-token}
       - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-*}
       - PORT=${PORT:-8000}
     networks:

@@ -2,10 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routes import employees, attendance, departments, dashboard
 from app.database import connect_to_mongo, close_mongo_connection
-from app.auth import verify_token
 from app.core.config import settings
-from fastapi import Depends
-
 app = FastAPI(title="HRMS-Lite API")
 
 
@@ -22,25 +19,21 @@ app.include_router(
     employees.router,
     prefix="/api/employees",
     tags=["employees"],
-    dependencies=[Depends(verify_token)],
 )
 app.include_router(
     attendance.router,
     prefix="/api/attendance",
     tags=["attendance"],
-    dependencies=[Depends(verify_token)],
 )
 app.include_router(
     departments.router,
     prefix="/api/departments",
     tags=["departments"],
-    dependencies=[Depends(verify_token)],
 )
 app.include_router(
     dashboard.router,
     prefix="/api/dashboard",
     tags=["dashboard"],
-    dependencies=[Depends(verify_token)],
 )
 
 

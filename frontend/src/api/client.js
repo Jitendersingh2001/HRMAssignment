@@ -7,12 +7,6 @@ const api = axios.create({
   },
 });
 
-api.interceptors.request.use((config) => {
-  const isAuth = localStorage.getItem('hrms_auth');
-  if (isAuth === 'true') {
-    config.headers.Authorization = `Bearer admin123-token`;
-  }
-  return config;
-});
+
 
 export default api;

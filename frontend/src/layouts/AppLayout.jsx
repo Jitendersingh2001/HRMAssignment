@@ -1,17 +1,11 @@
-import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Users, CalendarCheck, Menu, LogOut } from 'lucide-react';
+import { Outlet, NavLink } from 'react-router-dom';
+import { LayoutDashboard, Users, CalendarCheck, Menu } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '../utils/cn';
 import { ROUTES } from '../constants/routes';
 
 export default function AppLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    localStorage.removeItem('hrms_auth');
-    navigate(ROUTES.LOGIN);
-  };
 
   const navigation = [
     { name: 'Dashboard', href: ROUTES.DASHBOARD, icon: LayoutDashboard },
@@ -61,16 +55,6 @@ export default function AppLayout() {
             );
           })}
         </nav>
-
-        <div className="p-4 border-t border-gray-100">
-          <button
-            onClick={handleLogout}
-            className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
-          >
-            <LogOut className="h-5 w-5" />
-            Logout
-          </button>
-        </div>
       </div>
 
       {/* Main content */}
