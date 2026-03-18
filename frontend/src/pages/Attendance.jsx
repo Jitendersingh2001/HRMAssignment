@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { Search, Calendar as CalendarIcon, CheckCircle2, XCircle, X, Loader2 } from 'lucide-react';
+import { Search, Calendar as CalendarIcon, CheckCircle2, XCircle, X, Loader2, ChevronDown } from 'lucide-react';
 import { format } from 'date-fns';
 import api from '../api/client';
 import { Button } from '@/components/ui/button';
@@ -7,6 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
 
 export default function Attendance() {
   const [employees, setEmployees] = useState([]);
@@ -21,9 +23,18 @@ export default function Attendance() {
   const [searchQuery, setSearchQuery] = useState('');
 
   // Date Filter State
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  const [dateRange, setDateRange] = useState({ from: undefined, to: undefined });
   const [isFiltered, setIsFiltered] = useState(false);
+
+  const startDateParam = useMemo(() => {
+    if (!dateRange?.from) return '';
+    return format(dateRange.from, 'yyyy-MM-dd');
+  }, [dateRange?.from]);
+
+  const endDateParam = useMemo(() => {
+    if (!dateRange?.to) return '';
+    return format(dateRange.to, 'yyyy-MM-dd');
+  }, [dateRange?.to]);
 
   // Fetch all attendance globally (filtered by date)
   const fetchGlobalAttendance = useCallback(async (start, end) => {
@@ -45,14 +56,14 @@ export default function Attendance() {
 
   // Fetch global attendance automatically when dates change (or on initial load)
   useEffect(() => {
-    if (startDate || endDate) {
+    if (startDateParam || endDateParam) {
       setIsFiltered(true);
-      fetchGlobalAttendance(startDate, endDate);
+      fetchGlobalAttendance(startDateParam, endDateParam);
     } else {
       setIsFiltered(false);
       fetchGlobalAttendance();
     }
-  }, [startDate, endDate, fetchGlobalAttendance]);
+  }, [startDateParam, endDateParam, fetchGlobalAttendance]);
 
   // Fetch employees list for dropdown/selection
   useEffect(() => {
@@ -74,8 +85,7 @@ export default function Attendance() {
   }, []);
 
   const handleClearFilter = () => {
-    setStartDate('');
-    setEndDate('');
+    setDateRange({ from: undefined, to: undefined });
   };
 
   const handleMarkAttendance = async (status) => {
@@ -224,19 +234,42 @@ export default function Attendance() {
                   
                   {/* Date Filters */}
                   <div className="flex items-center gap-2 bg-background border border-border rounded-lg p-1 shadow-sm">
-                    <Input
-                      type="date"
-                      value={startDate}
-                      onChange={(e) => setStartDate(e.target.value)}
-                      className="w-[130px] h-8 text-xs border-0 focus-visible:ring-0 bg-transparent"
-                    />
-                    <span className="text-xs font-semibold text-muted-foreground px-1">to</span>
-                    <Input
-                      type="date"
-                      value={endDate}
-                      onChange={(e) => setEndDate(e.target.value)}
-                      className="w-[130px] h-8 text-xs border-0 focus-visible:ring-0 bg-transparent"
-                    />
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          data-empty={!dateRange?.from || !dateRange?.to}
+                          className="w-[280px] sm:w-[320px] justify-between text-left font-normal data-[empty=true]:text-muted-foreground border-0 bg-transparent shadow-none hover:bg-muted/60"
+                        >
+                          {dateRange?.from ? (
+                            dateRange?.to ? (
+                              `${format(dateRange.from, 'PPP')} to ${format(dateRange.to, 'PPP')}`
+                            ) : (
+                              `${format(dateRange.from, 'PPP')} to End date`
+                            )
+                          ) : (
+                            <span>Start date to End date</span>
+                          )}
+                          <ChevronDown className="h-4 w-4 opacity-70" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent
+                        className="w-auto p-0 max-w-[calc(100vw-1rem)]"
+                        side="bottom"
+                        sideOffset={8}
+                        align="end"
+                      >
+                        <Calendar
+                          mode="range"
+                          numberOfMonths={2}
+                          defaultMonth={dateRange?.from}
+                          selected={dateRange}
+                          onSelect={(range) => setDateRange(range ?? { from: undefined, to: undefined })}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
                     {isFiltered && (
                       <button 
                         onClick={handleClearFilter} 
